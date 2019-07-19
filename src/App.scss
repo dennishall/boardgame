@@ -1,0 +1,51 @@
+* {
+  box-sizing: border-box;
+}
+$space-width: 100px;
+$space-height: 150px;
+
+.App {
+  text-align: center;
+  margin-top: 1200px;
+}
+
+.edge {
+  float: right;
+  height: $space-height;
+  &:not(:first-child) {
+    transform: translateY($space-height) rotate(90deg) ;
+    transform-origin: top right;
+  }
+  &:first-child {
+    width: 4 * (9 * $space-width + $space-height);
+  }
+  &--left {
+    width: 3 * (9 * $space-width + $space-height);
+  }
+  &--top {
+    width: 2 * (9 * $space-width + $space-height);
+  }
+  &--right {
+    width: 1 * (9 * $space-width + $space-height);
+  }
+}
+
+.space {
+  float: right;
+  width: $space-width;
+  height: $space-height;
+  border: 2px solid black;
+  &:not(.corner) {
+    border-width: 4px 2px;
+  }
+  &.corner {
+    border-width: 2px 4px 4px 2px;
+  }
+}
+
+.corner {
+  width: $space-height;
+  height: $space-height;
+}
+
+
