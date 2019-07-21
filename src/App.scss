@@ -1,12 +1,15 @@
+// should be 250 x 400
+$space-width: 100px;
+$space-height: 160px;
+
+
 * {
   box-sizing: border-box;
 }
-$space-width: 100px;
-$space-height: 150px;
 
 .App {
   text-align: center;
-  margin-top: 1200px;
+  margin: 1200px 0 0;
 }
 
 .edge {
@@ -34,18 +37,52 @@ $space-height: 150px;
   float: right;
   width: $space-width;
   height: $space-height;
-  border: 2px solid black;
-  &:not(.corner) {
-    border-width: 4px 2px;
+  border: 1px solid black;
+  border-width: 2px 1px;
+  &:nth-child(2) {
+    border-right: 0;
   }
-  &.corner {
-    border-width: 2px 4px 4px 2px;
+  &:nth-child(10) {
+    border-left: 0;
+  }
+  &--corner {
+    border-width: 2px;
+    width: $space-height;
+  }
+  &__color {
+    height: 30px;
+    border-bottom: 2px solid black;
+    margin: 0 0 10px;
+  }
+  &__name {
+    padding: 0 3px;
+    font-size: 14px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: 'PT Sans', sans-serif;
+    .space--corner & {
+      font-size: 20px;
+      position: relative;
+      top: 45%;
+      transform: rotate(-45deg);
+    }
+    .go & {
+      top: 40px;
+      font-size: 70px;
+      font-weight: normal;
+      line-height: 1;
+      color: red;
+      text-shadow: 0 2px 2px black;
+      &:after {
+        display: block;
+        position: absolute;
+        transform: rotate(45deg);
+        font-size: 80px;
+        top: 30px;
+        left: -6px;
+        content: '\27F5';
+      }
+    }
   }
 }
-
-.corner {
-  width: $space-height;
-  height: $space-height;
-}
-
-
