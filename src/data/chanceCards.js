@@ -7,27 +7,27 @@ var chanceCards = [
   {
     title: "Advance to Go (Collect $200)",
     action: function (player) {
-      advancePlayerToSpace(player, {name: 'GO'})
+      advancePlayerToSpace.call(this, player, {name: 'GO'})
     }
   },
   {
     title: "Advance to Illinois Ave — If you pass Go, collect $200",
     action: function (player) {
-      advancePlayerToSpace(player, {name: 'Illinois Avenue'})
+      advancePlayerToSpace.call(this, player, {name: 'Illinois Avenue'})
       // todo: if someone else owns this space, make player pay rent.
     }
   },
   {
     title: "Advance to St. Charles Place – If you pass Go, collect $200",
     action: function (player) {
-      advancePlayerToSpace(player, {name: 'St. Charles Place'})
+      advancePlayerToSpace.call(this, player, {name: 'St. Charles Place'})
       // todo: if someone else owns this space, make player pay rent.
     }
   },
   {
     title: "Advance token to nearest Utility. If unowned, you may buy it from the Bank. If owned, throw dice and pay owner a total ten times the amount thrown.",
     action: function (player) {
-      advancePlayerToSpace(player, {group: 'utility'})
+      advancePlayerToSpace.call(this, player, {group: 'utility'})
       // todo : we need a way to find the owner of a property, if any.
       // todo : if owned, "roll dice" & pay owner 10x dice value
     }
@@ -35,7 +35,7 @@ var chanceCards = [
   {
     title: "Advance token to the nearest Railroad and pay owner twice the rental to which she/he is otherwise entitled. If Railroad is unowned, you may buy it from the Bank.",
     action: function (player) {
-      advancePlayerToSpace(player, {group: 'railroad'})
+      advancePlayerToSpace.call(this, player, {group: 'railroad'})
       // todo : we need a way to find the owner of a property, if any.
       // todo : if owned, pay owner 2x rent
     }
@@ -63,7 +63,7 @@ var chanceCards = [
   {
     title: "Go to Jail – Go directly to Jail – Do not pass Go, do not collect $200",
     action: function (player) {
-      advancePlayerToSpace(player, {name: 'Jail'}, true)
+      advancePlayerToSpace.call(this, player, {name: 'Jail'}, true)
       player.isInJail = true
       player.numTurnsInJail = 0
       // done
@@ -85,14 +85,14 @@ var chanceCards = [
   {
     title: "Take a trip to Reading Railroad – If you pass Go, collect $200",
     action: function (player) {
-      advancePlayerToSpace(player, {name: 'Reading Railroad'})
+      advancePlayerToSpace.call(this, player, {name: 'Reading Railroad'})
       // todo: if someone else owns this space, make player pay rent.
     }
   },
   {
     title: "Take a walk on the Boardwalk–Advance token to Boardwalk",
     action: function (player) {
-      advancePlayerToSpace(player, {name: 'Boardwalk'})
+      advancePlayerToSpace.call(this, player, {name: 'Boardwalk'})
       // todo: if someone else owns this space, make player pay rent.
     }
   },

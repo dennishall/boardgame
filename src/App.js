@@ -2,9 +2,13 @@ import React, { Component } from 'react'
 import Space from './Space'
 import GetPlayerInfo from './components/GetPlayerInfo'
 import boardSpacesData from './data/boardSpacesData'
+import chanceCards from './data/chanceCards'
+import communityChestCards from './data/communityChestCards'
 import gamePhases from './data/gamePhases'
 import './App.scss'
 import advancePlayerToSpace from './utils/advancePlayerToSpace'
+
+console.log("global['chanceCards']", global['chanceCards'])
 
 class App extends Component {
 
@@ -25,6 +29,8 @@ class App extends Component {
         {id: 7, name: '', token: '', spaceIndex: 0, money: 1500, properties: [], numDoubles: 0, orbits: 0},
       ],
       indexOfWhoseTurnItIs: 0,
+      chanceCards: this.getShuffledCards(chanceCards),
+      communityChestCards: this.getShuffledCards(communityChestCards),
     }
     // self-bind all methods
     this.onChangeNumPlayers = this.onChangeNumPlayers.bind(this)
@@ -33,6 +39,17 @@ class App extends Component {
     this.onStartGame = this.onStartGame.bind(this)
     this.onEndTurn = this.onEndTurn.bind(this)
     this.simulateTurn = this.simulateTurn.bind(this)
+
+    console.log('App c\'tor, typeof `this`:', typeof this, this.constructor)
+  }
+
+  getShuffledCards (originalCards) {
+    let newCards = []
+    // copy the originals
+    originalCards.forEach(card => newCards.push(Object.assign({}, card)))
+    // shuffle the copies
+    newCards.sort(() => Math.random() < .5 ? -1 : 1)
+    return newCards
   }
 
   onChangeNumPlayers (e) {
@@ -91,8 +108,12 @@ class App extends Component {
   // utility functions
   //////////////////////////////////////////
 
+  getNetWorth (player) {
+    return player.money + player.properties.reduce((total, property) => total + property.price, 0)
+  }
+
   indexOfOwner (space) {
-    for (var i = 0; i < this.state.numPlayers; i++) {
+    for (let i = 0; i < this.state.numPlayers; i++) {
       if (this.state.players[i].properties.some(property => property.name === space.name)) {
         return i
       }
@@ -113,19 +134,36 @@ class App extends Component {
       let aIsUtil = /util/.test(a.group)
       let bIsRail = /rail/.test(b.group)
       let bIsUtil = /util/.test(b.group)
+      // rails before utils
       if(aIsRail && bIsUtil) return -1;
       if(aIsUtil && bIsRail) return 1;
+      // rails and utils before others
       if(aIsRail || aIsUtil) return -1;
       if(bIsRail || bIsUtil) return 1;
+      // "board" order
       return aIndex < bIndex ? -1 : 1
     })
-    console.log(player.token, 'bought her/his', player.properties.length, '\' property:', property.name, 'for', property.price, 'new balance', player.money)
+    let numProperties = player.properties.length
+    let suffix;
+    if (numProperties === 1) {
+      suffix = 'st'
+    }
+    if (numProperties === 2) {
+      suffix = 'nd'
+    }
+    if (numProperties === 3) {
+      suffix = 'rd'
+    }
+    if (numProperties > 3) {
+      suffix = 'th'
+    }
+    console.log('📃', player.token, 'bought her/his', '' + numProperties + suffix, 'property:', property.name, 'for', property.price, 'new balance', player.money)
   }
 
   payRent (player, owner) {
     // does the owner own all properties in the group?
     let space = boardSpacesData[player.spaceIndex]
-    console.log('about to pay rent...', player.spaceIndex, JSON.stringify(space));
+    // console.log('about to pay rent...', JSON.stringify(space));
     let property = owner.properties.find(p => p.name === space.name)
     let rent;
     let numPropertiesOwnedInGroup = 0
@@ -168,10 +206,11 @@ class App extends Component {
     // for now, assume it's ok
     player.money -= rent
     owner.money += rent
-    console.warn(player.token, 'payed', rent, 'rent to', owner.token, 'new balances: ', player.money, owner.money)
+    console.log('💸', player.token, 'payed', rent, 'rent to', owner.token, 'for landing on', space.name)
   }
 
   simulateTurn () {
+    let _this = this
     let players = JSON.parse(JSON.stringify(this.state.players))
     let player = players[this.state.indexOfWhoseTurnItIs]
     // roll dice
@@ -183,7 +222,7 @@ class App extends Component {
       player.numDoubles++;
       if (player.numDoubles === 3) {
         // todo - display message: "you rolled doubles three times in a row, you're now going straight to jail :("
-        console.log(player.token, '!!!!!!!!!!!!!!! rolled doubles three times, went to jail')
+        console.log('🚓', player.token, '!!!!!!!!!!!!!!! rolled doubles three times, went to jail')
         player.numDoubles = 0;
         advancePlayerToSpace(player, {name: 'Jail'}, true)
         this.setState({
@@ -200,9 +239,8 @@ class App extends Component {
         player.spaceIndex = 0
         player.money += 200
         player.orbits++
-        console.log(player.token, 'landed on or passed GO and collected $200, now has', player.money)
+        console.log('💰', player.token, 'landed on or passed GO and collected $200, now has', player.money)
       }
-      console.log(player.token, 'advanced to', boardSpacesData[player.spaceIndex].name || boardSpacesData[player.spaceIndex].type, i + 1, diceValue)
       this.setState({
         players: players
       }, function () {
@@ -211,15 +249,16 @@ class App extends Component {
           setTimeout(move.bind(this), 100)
           return
         }
+        console.log(player.token, 'advanced to', boardSpacesData[player.spaceIndex].name || boardSpacesData[player.spaceIndex].type)
         let space = boardSpacesData[player.spaceIndex]
-        let indexOfOwner = this.indexOfOwner(space)
+        let indexOfOwner = _this.indexOfOwner(space)
         if (space.type === 'property') {
           if (indexOfOwner >= 0) {
             // it's owned.  do you own it?
             if (indexOfOwner !== this.state.indexOfWhoseTurnItIs) {
               // nope, pay rent.
-              this.payRent(player, players[indexOfOwner])
-              this.setState({
+              _this.payRent(player, players[indexOfOwner])
+              _this.setState({
                 players: players
               })
             }
@@ -227,19 +266,63 @@ class App extends Component {
             // it's unowned
             // for the sake of simulation, buy it if you have enough money
             if (player.money >= space.price) {
-              this.buyProperty(player, space)
-              this.setState({
+              _this.buyProperty(player, space)
+              _this.setState({
                 players: players
               })
             }
           }
         } else {
-          // or get chance or community chest card, if it is one of those
           // or pay income tax or luxury tax, if it is one of those
-          // ... and present insufficient funds dialog if needed.
-          // TODO ^ all o' that
+          if (space.type === 'income tax') {
+            console.log(player.token, 'landed on income tax and paid', Math.min(_this.getNetWorth(player), 200))
+            player.money -= Math.min(_this.getNetWorth(player), 200)
+          }
+          if (space.type === 'luxury tax') {
+            console.log(player.token, 'landed on luxury tax and paid 75')
+            player.money -= 75
+          }
+
+          // todo: chance and community chest are basically identical in the way they work, the following can be simplified.
+
+          if (space.type === 'chance') {
+            // warn! - do not directly alter state!
+            let card = _this.state.chanceCards.pop()
+            if (!card) {
+              _this.setState({
+                chanceCards: _this.getShuffledCards(chanceCards),
+              }, function () {
+                // warn! - do not directly alter state!
+                card = _this.state.chanceCards.pop()
+                console.log(`%c${player.token} chance card: ${card.title}`, "background: orange; color: black; padding: 3px;")
+                card.action.call(_this, player, players)
+              })
+            } else {
+              console.log("%c" + `${player.token} chance card: ${card.title}`, "background: orange; color: black; padding: 3px;")
+              card.action.call(_this, player, players)
+            }
+          }
+          // or get chance or community chest card, if it is one of those
+          if (space.type === 'community chest') {
+            // warn! - do not directly alter state!
+            let card = _this.state.communityChestCards.pop()
+            if (!card) {
+              _this.setState({
+                communityChestCards: _this.getShuffledCards(communityChestCards),
+              }, function () {
+                // warn! - do not directly alter state!
+                card = _this.state.communityChestCards.pop()
+                console.log("%c" + `${player.token} community chest card: ${card.title}`, "background: yellow; color: black; padding: 3px;")
+                card.action.call(_this, player, players)
+              })
+            } else {
+              console.log("%c" + `${player.token} community chest card: ${card.title}`, "background: yellow; color: black; padding: 3px;")
+              card.action.call(_this, player, players)
+            }
+          }
+          // todo: present insufficient funds dialog if needed.
         }
-        this.onEndTurn()
+        _this.onEndTurn()
       })
     }
     move.bind(this)();
@@ -318,7 +401,7 @@ class App extends Component {
                   <th>Net Worth:</th>
                   {this.state.players.slice(0, this.state.numPlayers).map(player =>
                     <td key={player.id}>
-                      {player.money + player.properties.reduce((total, property) => total + property.price, 0)}
+                      {_this.getNetWorth(player)}
                     </td>
                   )}
                 </tr>
