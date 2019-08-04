@@ -26,6 +26,14 @@ function Space (props) {
       <div className={'space__name'}>
         {space.name || space.type}
       </div>
+      <div className={'space__players'}>
+        {props.players.map(player =>
+          player.spaceIndex === props.spaceIndex &&
+          <div className={'space__player'} title={player.name} key={player.id}>
+            {player.token}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

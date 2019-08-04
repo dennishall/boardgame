@@ -1,0 +1,17 @@
+.get-player-info {
+  position: absolute;
+  top: -800px;
+  left: 445px;
+  width: 900px;
+  .row {
+    display: flex;
+  }
+  .field {
+    display: inline-block;
+  }
+  .radio {
+    padding: 2px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+}

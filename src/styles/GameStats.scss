@@ -1,0 +1,26 @@
+.game-stats {
+  position: absolute;
+  top: -800px;
+  left: 750px;
+  th, td {
+    vertical-align: top;
+    padding: 5px;
+  }
+  th, td:not(.property-micro-indicators) {
+    text-align: left;
+  }
+}
+
+.property-micro-indicator {
+  float: left;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #777;
+  margin: 0 3px 3px 0;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 16px;
+  &:nth-child(5n + 1) {
+    clear: left;
+  }
+}
