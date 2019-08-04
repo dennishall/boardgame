@@ -3,8 +3,16 @@
   top: -800px;
   left: 445px;
   width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: scale(1.5);
   .row {
     display: flex;
+    margin: 5px auto;
+  }
+  .col {
+    margin: 0 5px;
   }
   .field {
     display: inline-block;
@@ -13,5 +21,19 @@
     padding: 2px;
     cursor: pointer;
     margin-right: 5px;
+  }
+  button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 20px;
+    letter-spacing: 1px;
+    border-radius: 5px;
+    border-style: solid;
+    border-width: 0;
+    color: white;
+    background: #e00;
+    font-weight: bold;
   }
 }

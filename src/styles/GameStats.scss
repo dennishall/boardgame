@@ -1,7 +1,11 @@
 .game-stats {
   position: absolute;
   top: -800px;
-  left: 750px;
+  left: 445px;
+  width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   th, td {
     vertical-align: top;
     padding: 5px;

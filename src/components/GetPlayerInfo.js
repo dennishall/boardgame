@@ -8,7 +8,8 @@ function GetPlayerInfo (props) {
       {/* NUMBER OF PLAYERS */}
       <div className='row'>
         <div className='col'>
-          Number of Players
+          Number of Players:
+          {' '}
         </div>
         <div className='col'>
           {[2, 3, 4, 5, 6, 7, 8].map(n =>
@@ -36,7 +37,8 @@ function GetPlayerInfo (props) {
             <div className='field'>
               <label>
                 <span className='label'>
-                  Player Name
+                  Player Name:
+                  {' '}
                 </span>
                 <input
                   type='text'
@@ -51,7 +53,8 @@ function GetPlayerInfo (props) {
             <div className='field'>
               <label>
                 <span className='label'>
-                  Token
+                  Token:
+                  {' '}
                 </span>
                 <select
                   name={'token' + player.id}
@@ -82,7 +85,7 @@ function GetPlayerInfo (props) {
           <button
             onClick={props.onStartGame}
           >
-            Start!
+            Start
           </button>
         </div>
       </div>

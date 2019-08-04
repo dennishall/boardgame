@@ -346,7 +346,9 @@ class App extends Component {
             </div>
           </div>
         )}
-        <div className={'board'}>
+        <div
+          className={'board' + (this.state.gamePhase === gamePhases.REGULAR ? '' : ' blurred')}
+        >
           <div className="edge edge--bottom">
             {getSpaces(0, 10)}
             <div className="edge edge--left">

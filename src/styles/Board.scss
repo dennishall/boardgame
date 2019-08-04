@@ -2,6 +2,13 @@
 $space-width: 100px;
 $space-height: 160px;
 
+.board {
+  &.blurred {
+    filter: blur(4px);
+    opacity: 0.7;
+  }
+}
+
 .edge {
   float: right;
   height: $space-height;
