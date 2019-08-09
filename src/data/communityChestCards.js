@@ -34,19 +34,28 @@ var communityChestCards = [
   {
     title: "Get Out of Jail Free",
     action: function (player) {
-      // todo
+      player.numGetOutOfJailFreeCards++
+      // done
     }
   },
   {
     title: "Go to Jail – Go directly to jail – Do not pass Go – Do not collect $200",
     action: function (player) {
-      // todo
+      player.spaceIndex = 10
+      player.isInJail = true
+      // done
     }
   },
   {
     title: "Grand Opera Night — Collect $50 from every player for opening night seats",
     action: function (player, players) {
-      // todo
+      players.forEach(otherPlayer => {
+        if (player.id !== otherPlayer.id) {
+          // todo: does the other player have enough money?
+          player.money += 50
+          otherPlayer.money -= 50
+        }
+      })
     }
   },
   {
@@ -101,7 +110,11 @@ var communityChestCards = [
   {
     title: "You are assessed for street repairs – $40 per house – $115 per hotel",
     action: function (player) {
-      // todo
+      let amountOwed = 0
+      player.properties.forEach(property => {
+        amountOwed += property.numHouses === 5 ? 115 : property.numHouses * 40
+      })
+      player.money -= amountOwed
     }
   },
   {

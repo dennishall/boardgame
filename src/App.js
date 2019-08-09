@@ -8,8 +8,6 @@ import gamePhases from './data/gamePhases'
 import './App.scss'
 import advancePlayerToSpace from './utils/advancePlayerToSpace'
 
-console.log("global['chanceCards']", global['chanceCards'])
-
 class App extends Component {
 
   constructor (props) {
@@ -18,20 +16,24 @@ class App extends Component {
       gamePhase: gamePhases.PRE,
       numPlayers: 2,
       numTurnsTotal: 0,
-      players: [
-        {id: 0, name: '', token: '', spaceIndex: 0, money: 1500, properties: [], numDoubles: 0, orbits: 0},
-        {id: 1, name: '', token: '', spaceIndex: 0, money: 1500, properties: [], numDoubles: 0, orbits: 0},
-        {id: 2, name: '', token: '', spaceIndex: 0, money: 1500, properties: [], numDoubles: 0, orbits: 0},
-        {id: 3, name: '', token: '', spaceIndex: 0, money: 1500, properties: [], numDoubles: 0, orbits: 0},
-        {id: 4, name: '', token: '', spaceIndex: 0, money: 1500, properties: [], numDoubles: 0, orbits: 0},
-        {id: 5, name: '', token: '', spaceIndex: 0, money: 1500, properties: [], numDoubles: 0, orbits: 0},
-        {id: 6, name: '', token: '', spaceIndex: 0, money: 1500, properties: [], numDoubles: 0, orbits: 0},
-        {id: 7, name: '', token: '', spaceIndex: 0, money: 1500, properties: [], numDoubles: 0, orbits: 0},
-      ],
+      players: [0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => ({
+        id: i,
+        name: '',
+        token: '',
+        spaceIndex: 0,
+        money: 1500,
+        properties: [],
+        numDoubles: 0,
+        numGetOutOfJailFreeCards: 0,
+        isInJail: false,
+        numTurnsInJail: 0,
+        orbits: 0,
+      })),
       indexOfWhoseTurnItIs: 0,
       chanceCards: this.getShuffledCards(chanceCards),
       communityChestCards: this.getShuffledCards(communityChestCards),
     }
+
     // self-bind all methods
     this.onChangeNumPlayers = this.onChangeNumPlayers.bind(this)
     this.onChangePlayerName = this.onChangePlayerName.bind(this)
@@ -160,7 +162,7 @@ class App extends Component {
     console.log('📃', player.token, 'bought her/his', '' + numProperties + suffix, 'property:', property.name, 'for', property.price, 'new balance', player.money)
   }
 
-  payRent (player, owner) {
+  payRent (player, owner, rentMultiplier) {
     // does the owner own all properties in the group?
     let space = boardSpacesData[player.spaceIndex]
     // console.log('about to pay rent...', JSON.stringify(space));
@@ -184,7 +186,7 @@ class App extends Component {
     // is it a railroad?
     if (property.group === 'railroad') {
       // then rent is based on number of railroads owned
-      rent = property.rents[numPropertiesOwnedInGroup]
+      rent = property.rents[numPropertiesOwnedInGroup] * (rentMultiplier || 1)
     }
     // is it a utility?
     else if (property.group === 'utility') {
@@ -193,12 +195,13 @@ class App extends Component {
       let dieValue2 = Math.ceil(Math.random() * 6)
       let diceValue = dieValue1 + dieValue2
       console.log('rolled dice: ', diceValue)
-      rent = Math.round(diceValue * (numPropertiesOwnedInGroup === 2 ? 10 : 4))
+      rent = Math.round(diceValue * (rentMultiplier || (numPropertiesOwnedInGroup === 2 ? 10 : 4)))
     }
     else {
       // it's a regular property
       rent = property.rents[property.numHouses]
       if (property.numHouses === 0 && ownerHasMonopoly) {
+        // no houses, but has a monopoly, rent is double
         rent *= 2
       }
     }
@@ -298,10 +301,11 @@ class App extends Component {
                 card.action.call(_this, player, players)
               })
             } else {
-              console.log("%c" + `${player.token} chance card: ${card.title}`, "background: orange; color: black; padding: 3px;")
+              console.log(`%c${player.token} chance card: ${card.title}`, "background: orange; color: black; padding: 3px;")
               card.action.call(_this, player, players)
             }
           }
+
           // or get chance or community chest card, if it is one of those
           if (space.type === 'community chest') {
             // warn! - do not directly alter state!
@@ -312,15 +316,17 @@ class App extends Component {
               }, function () {
                 // warn! - do not directly alter state!
                 card = _this.state.communityChestCards.pop()
-                console.log("%c" + `${player.token} community chest card: ${card.title}`, "background: yellow; color: black; padding: 3px;")
+                console.log(`%c${player.token} community chest card: ${card.title}`, "background: yellow; color: black; padding: 3px;")
                 card.action.call(_this, player, players)
               })
             } else {
-              console.log("%c" + `${player.token} community chest card: ${card.title}`, "background: yellow; color: black; padding: 3px;")
+              console.log(`%c${player.token} community chest card: ${card.title}`, "background: yellow; color: black; padding: 3px;")
               card.action.call(_this, player, players)
             }
           }
+
           // todo: present insufficient funds dialog if needed.
+
         }
         _this.onEndTurn()
       })
@@ -335,6 +341,16 @@ class App extends Component {
   render () {
     let _this = this;
 
+    // resize board to fit.
+    let viewportWidth = document.body.offsetWidth
+    let boardWidth = 1200
+    let style = {}
+    if (viewportWidth < boardWidth) {
+      style.transform = 'scale(' + ((viewportWidth - 30) / boardWidth) + ')'
+      style.transformOrigin = 'top left'
+      // todo - figure out how much it has to be translated too, up & to the left.
+    }
+
     function getSpaces (start, end) {
       return boardSpacesData.slice(start, end).map((space, i) => (
         <Space
@@ -348,7 +364,10 @@ class App extends Component {
     }
 
     return (
-      <div className="App">
+      <div
+        className="App"
+        style={style}
+      >
         {this.state.gamePhase === gamePhases.PRE && (
           <GetPlayerInfo
             numPlayers={this.state.numPlayers}

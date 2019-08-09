@@ -14,30 +14,24 @@ var chanceCards = [
     title: "Advance to Illinois Ave — If you pass Go, collect $200",
     action: function (player) {
       advancePlayerToSpace.call(this, player, {name: 'Illinois Avenue'})
-      // todo: if someone else owns this space, make player pay rent.
     }
   },
   {
     title: "Advance to St. Charles Place – If you pass Go, collect $200",
     action: function (player) {
       advancePlayerToSpace.call(this, player, {name: 'St. Charles Place'})
-      // todo: if someone else owns this space, make player pay rent.
     }
   },
   {
     title: "Advance token to nearest Utility. If unowned, you may buy it from the Bank. If owned, throw dice and pay owner a total ten times the amount thrown.",
     action: function (player) {
-      advancePlayerToSpace.call(this, player, {group: 'utility'})
-      // todo : we need a way to find the owner of a property, if any.
-      // todo : if owned, "roll dice" & pay owner 10x dice value
+      advancePlayerToSpace.call(this, player, {group: 'utility'}, 10)
     }
   },
   {
     title: "Advance token to the nearest Railroad and pay owner twice the rental to which she/he is otherwise entitled. If Railroad is unowned, you may buy it from the Bank.",
     action: function (player) {
-      advancePlayerToSpace.call(this, player, {group: 'railroad'})
-      // todo : we need a way to find the owner of a property, if any.
-      // todo : if owned, pay owner 2x rent
+      advancePlayerToSpace.call(this, player, {group: 'railroad'}, 2)
     }
   },
   {
@@ -50,20 +44,20 @@ var chanceCards = [
   {
     title: "Get Out of Jail Free",
     action: function (player) {
-      // todo
+      player.numGetOutOfJailFreeCards++
     }
   },
   {
     title: "Go Back 3 Spaces",
     action: function (player) {
-      player.spaceIndex -= 3;
-      // todo: if someone else owns this space, make player pay rent.
+      player.spaceIndex -= 4;
+      advancePlayerToSpace.call(this, player, player.spaceIndex + 1)
     }
   },
   {
     title: "Go to Jail – Go directly to Jail – Do not pass Go, do not collect $200",
     action: function (player) {
-      advancePlayerToSpace.call(this, player, {name: 'Jail'}, true)
+      player.spaceIndex = 10
       player.isInJail = true
       player.numTurnsInJail = 0
       // done
@@ -72,7 +66,11 @@ var chanceCards = [
   {
     title: "Make general repairs on all your property – For each house pay $25–For each hotel $100",
     action: function (player) {
-      // todo
+      let amountOwed = 0
+      player.properties.forEach(property => {
+        amountOwed += property.numHouses === 5 ? 100 : property.numHouses * 25
+      })
+      player.money -= amountOwed
     }
   },
   {
@@ -86,20 +84,25 @@ var chanceCards = [
     title: "Take a trip to Reading Railroad – If you pass Go, collect $200",
     action: function (player) {
       advancePlayerToSpace.call(this, player, {name: 'Reading Railroad'})
-      // todo: if someone else owns this space, make player pay rent.
     }
   },
   {
     title: "Take a walk on the Boardwalk–Advance token to Boardwalk",
     action: function (player) {
       advancePlayerToSpace.call(this, player, {name: 'Boardwalk'})
-      // todo: if someone else owns this space, make player pay rent.
     }
   },
   {
     title: "You have been elected Chairman of the Board – Pay each player $50",
     action: function (player, players) {
-      // todo
+      // todo: first determine if the player has enough money
+      // let amountOwed = 50 * (players.length - 1)
+      players.forEach(otherPlayer => {
+        if (player.id !== otherPlayer.id) {
+          player.money -= 50
+          otherPlayer.money += 50
+        }
+      })
     }
   },
   {
